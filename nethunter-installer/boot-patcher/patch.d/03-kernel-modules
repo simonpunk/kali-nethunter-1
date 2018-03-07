@@ -42,7 +42,9 @@ find /system/lib/modules -type f -name "*.ko" > modules.installed
 while read -r kmod_installed; do
 	kmod_name=$(basename "$kmod_installed")
 	kmod_link="/system/lib/modules/$kmod_name"
-	ln -s "$kmod_installed" "$kmod_link"
+	if [ ! "qca_cld3_wlan.ko" = "$kmod_name" ]; then
+		ln -s "$kmod_installed" "$kmod_link"
+	fi
 	echo "Symlinked module (install): $kmod_link -> $kmod_installed"
 done < modules.installed
 
@@ -63,6 +65,7 @@ while read -r kmod; do
 	echo "Symlinked module (layout): $kmod_link -> $kmod_installed"
 done < modules.layout
 
+#ln -s /system/lib/modules/qca_cld3/qca_cld3_wlan.ko /system/lib/modules/wlan.ko
 setperm 0755 0644 /system/lib/modules
 chcon -R -h "u:object_r:system_file:s0" /system/lib/modules
 

@@ -7,8 +7,20 @@ on init
 on boot
     # Execute files in /system/etc/init.d near the end of the boot sequence
     start run-parts
-    # Save boot USB configuration for restoring after HID attacks
-    start save-usb-config
+    # start init-bootkali
+   
+    mkdir /config/usb_gadget/g1/functions/acm.usb0
+    mkdir /config/usb_gadget/g1/functions/ecm.usb0
+    mkdir /config/usb_gadget/g1/functions/hid.0
+    write /config/usb_gadget/g1/functions/hid.0/protocol "1"
+    write /config/usb_gadget/g1/functions/hid.0/subclass "1"
+    write /config/usb_gadget/g1/functions/hid.0/report_length "8"
+    copy /kybd-descriptor.bin /config/usb_gadget/g1/functions/hid.0/report_desc
+    mkdir /config/usb_gadget/g1/functions/hid.1
+    write /config/usb_gadget/g1/functions/hid.1/protocol "2"
+    write /config/usb_gadget/g1/functions/hid.1/subclass "1"
+    write /config/usb_gadget/g1/functions/hid.1/report_length "4"
+    copy /mouse-descriptor.bin /config/usb_gadget/g1/functions/hid.1/report_desc
 
 service run-parts /system/xbin/busybox_nh run-parts /system/etc/init.d
     class late_start
@@ -18,55 +30,740 @@ service run-parts /system/xbin/busybox_nh run-parts /system/etc/init.d
     disabled
     oneshot
 
-service save-usb-config /system/bin/sh /sbin/usb_config.sh save
-    class late_start
-    seclabel u:r:init:s0
-    user root
-    group root
-    disabled
-    oneshot
+#service init-bootkali /system/bin/sh /sbin/bootkali_init
+#    class late_start
+#    seclabel u:r:init:s0
+#    user root
+#    group root
+#    disabled
+#    oneshot
 
-service reset-usb-config /system/bin/sh /sbin/usb_config.sh reset
-    class late_start
-    seclabel u:r:init:s0
-    user root
-    group root
-    disabled
-    oneshot
+# USB Attack for OnePlus5
+ 
+# -- Nethunter HID begin -- #
 
-# After using HID attacks we should reset to OEM configuration
-on property:sys.usb.config=reset
-    start reset-usb-config
+### Reset the usb state to mtp without adb as everytime you reboot ###
+### Please note that the Dedault mtp will automatically mount the offical iso driver,
+### you will see it mounted on your pc everytime you connect to it.
+### So here I will change not to mount it. 
 
-# HID attack support (emulated Microsoft Comfort Curve Keyboard 2000)
-on property:sys.usb.config=hid
-    stop adbd
-    write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 045E
-    write /sys/class/android_usb/android0/idProduct 00DD
-    write /sys/class/android_usb/android0/bDeviceClass 0
-    write /sys/class/android_usb/android0/bDeviceSubClass 0
-    write /sys/class/android_usb/android0/bDeviceProtocol 0
-    write /sys/class/android_usb/android0/iManufacturer "Microsoft"
-    write /sys/class/android_usb/android0/iProduct "Microsoft USB Comfort Curve Keyboard 2000 (IntelliType Pro)"
-    write /sys/class/android_usb/android0/functions hid
-    write /sys/class/android_usb/android0/enable 1
-    setprop sys.usb.state hid
+on property:sys.usb.config=reset && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "mtp"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/bcdDevice 0x0404
+    write /config/usb_gadget/g1/bcdUSB 0x0200
+    write /config/usb_gadget/g1/bDeviceClass 0x00
+    write /config/usb_gadget/g1/bDeviceSubClass 0x00
+    write /config/usb_gadget/g1/bDeviceProtocol 0x00
+    write /config/usb_gadget/g1/idVendor 0x2a70 # default by factory
+    write /config/usb_gadget/g1/idProduct 0xf003 # default by factory
+    write /config/usb_gadget/g1/strings/0x409/manufacturer OnePlus
+    write /config/usb_gadget/g1/strings/0x409/product OnePlus
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 1 # dafault value
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 1 # default value
+    symlink /config/usb_gadget/g1/functions/mtp.gs0 /config/usb_gadget/g1/configs/b.1/f1
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
 
-# HID + Flash Drive attack support (emulated Kingston DataTraveler 2.0)
-on property:sys.usb.config=hid,mass_storage
-    stop adbd
-    write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/f_mass_storage/lun/cdrom 0
-    write /sys/class/android_usb/f_mass_storage/lun/ro 0
-    write /sys/class/android_usb/f_mass_storage/lun/nofua 0
-    write /sys/class/android_usb/android0/idVendor 0930
-    write /sys/class/android_usb/android0/idProduct 6545
-    write /sys/class/android_usb/android0/bDeviceClass 0
-    write /sys/class/android_usb/android0/bDeviceSubClass 0
-    write /sys/class/android_usb/android0/bDeviceProtocol 0
-    write /sys/class/android_usb/android0/iManufacturer "Kingston"
-    write /sys/class/android_usb/android0/iProduct "DataTraveler 2.0"
-    write /sys/class/android_usb/android0/functions hid,mass_storage
-    write /sys/class/android_usb/android0/enable 1
-    setprop sys.usb.state hid,mass_storage
+### Reset to the default usb state where you boot up the devices with adb ###
+on property:sys.usb.config=reset,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=reset,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "mtp_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/bcdDevice 0x0404
+    write /config/usb_gadget/g1/bcdUSB 0x0200
+    write /config/usb_gadget/g1/bDeviceClass 0x00
+    write /config/usb_gadget/g1/bDeviceSubClass 0x00
+    write /config/usb_gadget/g1/bDeviceProtocol 0x00
+    write /config/usb_gadget/g1/idVendor 0x2a70 # default by factory
+    write /config/usb_gadget/g1/idProduct 0x9011 # default by factory
+    write /config/usb_gadget/g1/strings/0x409/manufacturer OnePlus
+    write /config/usb_gadget/g1/strings/0x409/product OnePlus
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 1 # dafault value      
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 1 # default value
+    symlink /config/usb_gadget/g1/functions/mtp.gs0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+# -- Against Windows OS -- #
+### HID only ###
+on property:sys.usb.config=win,hid && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "hid"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0137
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Logitech, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "HID-Compliant Keyboard" 
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### HID + adb ###
+on property:sys.usb.config=win,hid,adb && property:sys.usb.configfs=1
+    start adbd
+    
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,hid,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "hid_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0138
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Logitech, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "HID-Compliant Keyboard"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f3
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### mass_storage only ###    
+on property:sys.usb.config=win,mass_storage && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "msc"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0141
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Google, Inc"
+    write /config/usb_gadget/g1/strings/0x409/product "Mass Storage Device"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f1
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### mass_storage + adb ###
+
+on property:sys.usb.config=win,mass_storage,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,mass_storage,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "msc_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0142
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Google, Inc"
+    write /config/usb_gadget/g1/strings/0x409/product "Mass Storage Device"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### RINDIS only ###    
+on property:sys.usb.config=win,rndis && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "rndis"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0143
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
+    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### RNDIS + adb ###
+on property:sys.usb.config=win,rndis,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,rndis,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "rndis_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0144
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
+    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### HID + mass_storage ###
+on property:sys.usb.config=win,hid,mass_storage && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "hid_msc"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0139
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Logitech, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "HID-Compliant Keyboard"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### HID + mass_storage + adb ###
+on property:sys.usb.config=win,hid,mass_storage,adb && property:sys.usb.configfs=1
+    start adbd
+    
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,hid,mass_storage,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "hid_msc_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0140
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Logitech, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "HID-Compliant Keyboard"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f4
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### RNDIS + mass_storage ###
+on property:sys.usb.config=win,rndis,mass_storage && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "rndis_msc"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0149
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
+    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### RNDIS + mass_storage + adb ###
+on property:sys.usb.config=win,rndis,mass_storage,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,rndis,mass_storage,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "rndis_msc_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0150
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
+    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f3
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+    
+### RNDIS + HID ###
+on property:sys.usb.config=win,rndis,hid && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "rndis_hid"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0145
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
+    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f3
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### RNDIS + HID + adb ###
+on property:sys.usb.config=win,rndis,hid,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,rndis,hid,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "rndis_hid_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0146
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
+    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f4
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+    
+### RNDIS + HID + mass_storage ###
+on property:sys.usb.config=win,rndis,hid,mass_storage && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "rndis_hid_msc"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0147
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
+    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f4
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### RNDIS + HID + mass_storage + adb ###
+on property:sys.usb.config=win,rndis,hid,mass_storage,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,rndis,hid,mass_storage,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "rndis_hid_msc_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0148
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
+    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f4
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f5
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+    
+# -- End of Window Part -- #  
+
+# -- Against Mac OS -- #
+### HID only ###
+on property:sys.usb.config=mac,hid && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "hid"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x05ac	# Apple, Inc.
+    write /config/usb_gadget/g1/idProduct 0x0201 # USB Keyboard
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "USB Keyboard"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### HID + adb ###
+on property:sys.usb.config=mac,hid,adb && property:sys.usb.configfs=1
+    start adbd
+    
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,hid,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "hid_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x05ac # Apple
+    write /config/usb_gadget/g1/idProduct 0x0201 # Apple Keyboard
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "USB Keyboard"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f3
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### mass_storage only ###    
+on property:sys.usb.config=mac,mass_storage && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "msc"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x0930
+    write /config/usb_gadget/g1/idProduct 0x6545
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "SuperDrive"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f1
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### mass_storage + adb ###
+
+on property:sys.usb.config=mac,mass_storage,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,mass_storage,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "msc_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x0930
+    write /config/usb_gadget/g1/idProduct 0x6545
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "SuperDrive"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### ECM only ###    
+on property:sys.usb.config=mac,ecm && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "ecm"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0104
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f2
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### ECM + adb ###
+on property:sys.usb.config=mac,ecm,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,ecm,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "ecm_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0104
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f3
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### HID + mass_storage ###
+on property:sys.usb.config=mac,hid,mass_storage && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "hid_msc"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x05ac
+    write /config/usb_gadget/g1/idProduct 0x0201
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "USB Keyboard"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file "" 
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### HID + mass_storage + adb ###
+on property:sys.usb.config=mac,hid,mass_storage,adb && property:sys.usb.configfs=1
+    start adbd
+    
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,hid,mass_storage,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "hid_msc_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x05ac 
+    write /config/usb_gadget/g1/idProduct 0x0201
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "USB Keyboard"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f4
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+    
+### ECM + HID ###
+on property:sys.usb.config=mac,ecm,hid && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "ecm_hid"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x05ac
+    write /config/usb_gadget/g1/idProduct 0x0201
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f4    
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### ECM + HID + adb ###
+on property:sys.usb.config=mac,ecm,hid,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,ecm,hid,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "ecm_hid_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x05ac
+    write /config/usb_gadget/g1/idProduct 0x0201
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f4
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f5
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### ECM + mass_storage ###
+on property:sys.usb.config=mac,ecm,mass_storage && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "ecm_msc"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0104
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### ECM + mass_storage + adb ###
+on property:sys.usb.config=mac,ecm,mass_storage,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,ecm,mass_storage,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "ecm_msc_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x1d6b
+    write /config/usb_gadget/g1/idProduct 0x0104
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f4
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+    
+### ECM + HID + mass_storage ###
+on property:sys.usb.config=mac,ecm,hid,mass_storage && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "ecm_hid_msc"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x05ac
+    write /config/usb_gadget/g1/idProduct 0x0201
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f4
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f5
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+### ECM + HID + mass_storage + adb ###
+on property:sys.usb.config=mac,ecm,hid,mass_storage,adb && property:sys.usb.configfs=1
+    start adbd
+
+on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,ecm,hid,mass_storage,adb && property:sys.usb.configfs=1
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "ecm_hid_msc_adb"
+    rm /config/usb_gadget/g1/configs/b.1/f1
+    rm /config/usb_gadget/g1/configs/b.1/f2
+    rm /config/usb_gadget/g1/configs/b.1/f3
+    rm /config/usb_gadget/g1/configs/b.1/f4
+    rm /config/usb_gadget/g1/configs/b.1/f5
+    rm /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/idVendor 0x05ac
+    write /config/usb_gadget/g1/idProduct 0x0201
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
+    write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
+    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
+    symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
+    symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
+    symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f3
+    symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f4
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f5
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f6
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+    setprop sys.usb.state ${sys.usb.config}
+
+ # -- End of Mac's Part -- #
+ # -- Nethunter HID END -- #
+
