@@ -2,10 +2,10 @@
 # NetHunter kernel installer backend
 
 ## start build generated variables
-kernel_string="NetHunter kernel"
-kernel_author="binkybear"
-kernel_version="1.0"
-device_names="OnePlus5 oneplus5 OnePlus 5 cheeseburger"
+kernel_string=
+kernel_author=
+kernel_version=
+device_names=
 generic=
 ## end build generated variables
 
