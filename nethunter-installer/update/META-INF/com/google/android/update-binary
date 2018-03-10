@@ -259,6 +259,7 @@ symlink "/data/data/com.offsec.nethunter/files/scripts/bootkali_init" "/system/b
 symlink "/data/data/com.offsec.nethunter/files/scripts/bootkali_login" "/system/bin/bootkali_login"
 symlink "/data/data/com.offsec.nethunter/files/scripts/bootkali_bash" "/system/bin/bootkali_bash"
 symlink "/data/data/com.offsec.nethunter/files/scripts/killkali" "/system/bin/killkali"
+symlink "/data/data/com.offsec.nethunter/files/scripts/usb_army" "/system/bin/usb_army"
 
 progress 0.8
 
