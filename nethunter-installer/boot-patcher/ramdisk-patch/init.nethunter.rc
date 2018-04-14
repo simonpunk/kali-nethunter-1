@@ -112,12 +112,11 @@ on property:sys.usb.config=win,hid && property:sys.usb.configfs=1
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0137
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Logitech, Inc."
-    write /config/usb_gadget/g1/strings/0x409/product "HID-Compliant Keyboard" 
+    write /config/usb_gadget/g1/idVendor 0x045e
+    write /config/usb_gadget/g1/idProduct 0xfff8
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Microsoft Corp."
+    write /config/usb_gadget/g1/strings/0x409/product "Keyboard" 
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
@@ -135,12 +134,11 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,hid,adb && proper
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0138
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Logitech, Inc."
-    write /config/usb_gadget/g1/strings/0x409/product "HID-Compliant Keyboard"
+    write /config/usb_gadget/g1/idVendor 0x045e
+    write /config/usb_gadget/g1/idProduct 0xfff8
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Microsoft Corp."
+    write /config/usb_gadget/g1/strings/0x409/product "Keyboard" 
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f3
@@ -156,14 +154,11 @@ on property:sys.usb.config=win,mass_storage && property:sys.usb.configfs=1
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0141
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Google, Inc"
-    write /config/usb_gadget/g1/strings/0x409/product "Mass Storage Device"
+    write /config/usb_gadget/g1/idVendor 0x045e
+    write /config/usb_gadget/g1/idProduct 0xffff
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Microsoft Corp."
+    write /config/usb_gadget/g1/strings/0x409/product "Windows CE Mass Storage"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f1
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
@@ -181,14 +176,11 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,mass_storage,adb 
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0142
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Google, Inc"
-    write /config/usb_gadget/g1/strings/0x409/product "Mass Storage Device"
+    write /config/usb_gadget/g1/idVendor 0x045e
+    write /config/usb_gadget/g1/idProduct 0xffff
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Microsoft Corp."
+    write /config/usb_gadget/g1/strings/0x409/product "Windows CE Mass Storage"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
@@ -203,12 +195,11 @@ on property:sys.usb.config=win,rndis && property:sys.usb.configfs=1
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0143
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
-    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/idVendor 0x0525
+    write /config/usb_gadget/g1/idProduct 0xa4a2
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Netchip Technology, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Linux-USB Ethernet/RNDIS Gadget"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
@@ -225,12 +216,11 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,rndis,adb && prop
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0144
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
-    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/idVendor 0x0525
+    write /config/usb_gadget/g1/idProduct 0xa4a2
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Netchip Technology, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Linux-USB Ethernet/RNDIS Gadget"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
@@ -245,14 +235,11 @@ on property:sys.usb.config=win,hid,mass_storage && property:sys.usb.configfs=1
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0139
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Logitech, Inc."
-    write /config/usb_gadget/g1/strings/0x409/product "HID-Compliant Keyboard"
+    write /config/usb_gadget/g1/idVendor 0x045e
+    write /config/usb_gadget/g1/idProduct 0xfff8
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Microsoft Corp."
+    write /config/usb_gadget/g1/strings/0x409/product "Keyboard" 
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
@@ -271,14 +258,11 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,hid,mass_storage,
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0140
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Logitech, Inc."
-    write /config/usb_gadget/g1/strings/0x409/product "HID-Compliant Keyboard"
+    write /config/usb_gadget/g1/idVendor 0x045e
+    write /config/usb_gadget/g1/idProduct 0xfff8
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Microsoft Corp."
+    write /config/usb_gadget/g1/strings/0x409/product "Keyboard" 
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
@@ -295,12 +279,11 @@ on property:sys.usb.config=win,rndis,mass_storage && property:sys.usb.configfs=1
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0149
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
-    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/idVendor 0x0525
+    write /config/usb_gadget/g1/idProduct 0xa4a2
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Netchip Technology, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Linux-USB Ethernet/RNDIS Gadget"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f2
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
@@ -318,12 +301,11 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,rndis,mass_storag
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0150
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
-    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/idVendor 0x0525
+    write /config/usb_gadget/g1/idProduct 0xa4a2
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Netchip Technology, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Linux-USB Ethernet/RNDIS Gadget"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f3
@@ -339,12 +321,11 @@ on property:sys.usb.config=win,rndis,hid && property:sys.usb.configfs=1
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0145
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
-    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/idVendor 0x0525
+    write /config/usb_gadget/g1/idProduct 0xa4a2
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Netchip Technology, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Linux-USB Ethernet/RNDIS Gadget"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f3
@@ -363,12 +344,11 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,rndis,hid,adb && 
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0146
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
-    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/idVendor 0x0525
+    write /config/usb_gadget/g1/idProduct 0xa4a2
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Netchip Technology, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Linux-USB Ethernet/RNDIS Gadget"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f3
@@ -385,14 +365,11 @@ on property:sys.usb.config=win,rndis,hid,mass_storage && property:sys.usb.config
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0147
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
-    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/idVendor 0x0525
+    write /config/usb_gadget/g1/idProduct 0xa4a2
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Netchip Technology, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Linux-USB Ethernet/RNDIS Gadget"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f3
@@ -412,14 +389,11 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=win,rndis,hid,mass_st
     rm /config/usb_gadget/g1/configs/b.1/f4
     rm /config/usb_gadget/g1/configs/b.1/f5
     rm /config/usb_gadget/g1/configs/b.1/f6
-    write /config/usb_gadget/g1/idVendor 0x1d6b
-    write /config/usb_gadget/g1/idProduct 0x0148
-    write /config/usb_gadget/g1/strings/0x409/manufacturer "Linux Foundation"
-    write /config/usb_gadget/g1/strings/0x409/product "Multifunction Composite Gadget"
+    write /config/usb_gadget/g1/idVendor 0x0525
+    write /config/usb_gadget/g1/idProduct 0xa4a2
+    write /config/usb_gadget/g1/strings/0x409/manufacturer "Netchip Technology, Inc."
+    write /config/usb_gadget/g1/strings/0x409/product "Linux-USB Ethernet/RNDIS Gadget"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/gsi.rndis /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f3
@@ -445,7 +419,6 @@ on property:sys.usb.config=mac,hid && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "USB Keyboard"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
@@ -468,7 +441,6 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,hid,adb && proper
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "USB Keyboard"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f3
@@ -489,9 +461,6 @@ on property:sys.usb.config=mac,mass_storage && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "SuperDrive"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f1
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
     setprop sys.usb.state ${sys.usb.config}
@@ -514,9 +483,6 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,mass_storage,adb 
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "SuperDrive"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f2
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
@@ -536,7 +502,6 @@ on property:sys.usb.config=mac,ecm && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f2
     write /config/usb_gadget/g1/UDC ${sys.usb.controller}
@@ -559,7 +524,6 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,ecm,adb && proper
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f3
@@ -580,9 +544,6 @@ on property:sys.usb.config=mac,hid,mass_storage && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "USB Keyboard"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file "" 
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
@@ -606,9 +567,6 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,hid,mass_storage,
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "USB Keyboard"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
@@ -630,7 +588,6 @@ on property:sys.usb.config=mac,ecm,hid && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f3
@@ -655,7 +612,6 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,ecm,hid,adb && pr
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f3
@@ -678,7 +634,6 @@ on property:sys.usb.config=mac,ecm,mass_storage && property:sys.usb.configfs=1
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
@@ -702,7 +657,6 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,ecm,mass_storage,
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
     symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/ecm.usb0 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f3
@@ -724,9 +678,6 @@ on property:sys.usb.config=mac,ecm,hid,mass_storage && property:sys.usb.configfs
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f3
@@ -752,9 +703,6 @@ on property:sys.usb.ffs.ready=1 && property:sys.usb.config=mac,ecm,hid,mass_stor
     write /config/usb_gadget/g1/strings/0x409/manufacturer "Apple, Inc."
     write /config/usb_gadget/g1/strings/0x409/product "Thunderbolt Ethernet"
     write /config/usb_gadget/g1/strings/0x409/serialnumber "11223344"
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/file ""
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/cdrom 0
-    #write /config/usb_gadget/g1/functions/mass_storage.0/lun.0/ro 0
     symlink /config/usb_gadget/g1/functions/hid.0 /config/usb_gadget/g1/configs/b.1/f1
     symlink /config/usb_gadget/g1/functions/hid.1 /config/usb_gadget/g1/configs/b.1/f2
     symlink /config/usb_gadget/g1/functions/acm.usb0 /config/usb_gadget/g1/configs/b.1/f3

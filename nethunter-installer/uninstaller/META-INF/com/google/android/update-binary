@@ -46,33 +46,14 @@ print " NetHunter Uninstaller "
 print "***********************"
 
 mount /system
-mount /data
 
 # Remove added firmware (folder would only exist if you installed NetHunter)
-[ -d "/system/etc/firmware/rtlwifi" ] && {
-	print "@Removing Firmware";
-	rm -rf /system/etc/firmware/rtlwifi
-	rm -rf /system/etc/firmware/zd1211
-	rm -f /system/etc/firmware/ar9170-1.fw
-	rm -f /system/etc/firmware/ar9170-2.fw
-	rm -f /system/etc/firmware/carl9170.fw
-	rm -f /system/etc/firmware/htc_7010.fw
-	rm -f /system/etc/firmware/rt73.bin
-	rm -f /system/etc/firmware/rt2561.bin
-	rm -f /system/etc/firmware/rt2860.bin
-	rm -f /system/etc/firmware/rt2870.bin
-	rm -f /system/etc/firmware/rt3070.bin
+
+[ -d "/data/local/nhsystem" ] && {
+	print "@Removing nhsystem"
+	rm -rf /data/local/nhsystem
 }
 
-[ -d "/system/priv-app/NetHunter" ] && {
-	print "@Removing NetHunter.apk"
-	rm -rf /system/priv-app/NetHunter
-}
-
-[ -d "/data/data/com.offsec.nethunter" ] && {
-	print "@Removing NetHunter chroot/data"
-	rm -rf /data/data/com.offsec.nethunter
-}
 
 cleanup
 print "@Uninstall complete"
