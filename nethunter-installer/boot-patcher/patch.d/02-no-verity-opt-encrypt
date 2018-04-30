@@ -4,45 +4,15 @@
 
 print "Disabling dm-verity & forced encryption..."
 
+fstab=/system/vendor/etc/fstab.qcom
 found_fstab=false
 
 device_name=$(getprop ro.product.device)
-isEncrypted=$(getprop ro.crypto.state)
+
+print "Device codename: $device_name"
 
 if [ "$device_name" = "cheeseburger" ] || [ "$device_name" = "dumpling" ]; then
-    print "Device is $device_name"
-    if [ "$isEncrypted" = "unencrypted" ]; then
-        print "Phone is not encrypted"
-        for fstab in /system/vendor/etc/fstab.*; do
-            [ -f "$fstab" ] || continue
-            found_fstab=true
-            print "Found fstab: $fstab"	
-            print "Changing fileencryption=ice to encryptable=footer"
-            sed "s/fileencryption=ice/encryptable=footer/g" "$fstab" | awk '
-                $1 ~ /^\// {
-                    n = split($5, flags, ",")
-                    newflags=""
-                    for (i = 1; i <= n; i++) {
-                        if (flags[i] == "")
-                            continue
-                        if (flags[i] ~ /^verify/)
-                            continue
-                        if (flags[i] ~ /^support_scfs/)
-                            continue
-                        if (i > 1) newflags = newflags ","
-                        newflags = newflags flags[i]
-                    }
-                    if ($5 != newflags) $5 = newflags
-                    if ($5 == "") $5 = "defaults"
-                }
-                { print }
-            ' > "$fstab-"
-            replace_file "$fstab" "$fstab-"
-        done
-    else
-        print "Device is encrypted!! There will be no change for fstab.qcom"
-        print "This may result a bootloop for any encrypted device, if you got bootloop, please make a factory reset in recovery and full wipe the system and data partition."
-    fi
+    print "Please flash no-verity zip if you want to stay unencrypted after flashing this zip."
 else
     for fstab in fstab.*; do
         [ -f "$fstab" ] || continue
